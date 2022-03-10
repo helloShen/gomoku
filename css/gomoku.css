@@ -67,3 +67,13 @@
 .gomokuBoardFrontLayer > .grid > img.phantom {
     opacity: .5;
 }
+
+.gomokuRollBackBtn {
+    padding: .5rem 1rem;
+    margin: 1rem;
+}
+
+.gomokuRestartBtn {
+    padding: .5rem 1rem;
+    margin: 1rem;
+}

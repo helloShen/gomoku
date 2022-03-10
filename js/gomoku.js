@@ -246,7 +246,7 @@ const controllers = (() => {
 
     function createRollBackController() {
         const btn = document.createElement('button');
-        btn.classList.add('rollBackBtn');
+        btn.classList.add('gomokuRollBackBtn');
         btn.textContent = 'Back';
         btn.addEventListener('click', () => game.rollBack());
         return btn;
@@ -254,7 +254,7 @@ const controllers = (() => {
 
     function createRestartController() {
         const btn = document.createElement('button');
-        btn.classList.add('restartBtn');
+        btn.classList.add('gomokuRestartBtn');
         btn.textContent = 'Restart';
         btn.addEventListener('click', () => game.restart());
         return btn;
