@@ -1,0 +1,63 @@
+:root {
+    /* board front layer */
+    --gomoku-size: 15;
+    --gomoku-grid-radius: 1rem;
+    --gomoku-grid-length: calc(var(--gomoku-grid-radius) * 2);
+    --gomoku-length: calc(var(--gomoku-size) * var(--gomoku-grid-length));
+    /* board back layer */
+    --gomoku-back-size: calc(var(--gomoku-size) * 2);
+    --gomoku-back-grid-radius: calc(var(--gomoku-grid-radius) / 2);
+    --gomoku-back-grid-length: calc(var(--gomoku-back-grid-radius) * 2);
+    /* colors */
+    --gomoku-board-yellow: #DCB35C;
+    --gomoku-black: black;
+}
+
+.gomokuBoard {
+    position: relative;
+}
+
+.gomokuBoardBackLayer {
+    width:  var(--gomoku-length);
+    height: var(--gomoku-length);
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 0;
+    display: grid;
+    grid-template-columns: repeat(var(--gomoku-back-size), var(--gomoku-back-grid-length));
+    grid-template-rows: repeat(var(--gomoku-back-size), var(--gomoku-back-grid-length));
+}
+
+.gomokuBoardBackLayer > .grid {
+    background-color: var(--gomoku-board-yellow);
+}
+
+.gomokuBoardBackLayer > .grid.borderBottom {
+    border-bottom: 1px solid var(--gomoku-black);
+}
+
+.gomokuBoardBackLayer > .grid.borderRight {
+    border-right: 1px solid var(--gomoku-black);
+}
+
+.gomokuBoardFrontLayer {
+    width:  var(--gomoku-length);
+    height: var(--gomoku-length);
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(var(--gomoku-size), var(--gomoku-grid-length));
+    grid-template-rows: repeat(var(--gomoku-size), var(--gomoku-grid-length));
+}
+
+.gomokuBoardFrontLayer > .grid > img {
+    width: 100%;
+    height: 100%;
+}
+
+.gomokuBoardFrontLayer > .grid > img.phantom {
+    opacity: .5;
+}
