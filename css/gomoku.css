@@ -1,7 +1,7 @@
 :root {
     /* board front layer */
     --gomoku-size: 15;
-    --gomoku-grid-radius: 1rem;
+    --gomoku-grid-radius: 1.25rem;
     --gomoku-grid-length: calc(var(--gomoku-grid-radius) * 2);
     --gomoku-length: calc(var(--gomoku-size) * var(--gomoku-grid-length));
     /* board back layer */
