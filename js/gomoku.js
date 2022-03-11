@@ -1,10 +1,13 @@
 /* board module */
 const board = (() => {
 
-    let board, frontLayer, backLayer = undefined;
+    let board, frontLayer, midLayer, backLayer, background = undefined;
 
-    /* to draw a gomoku board as background
-     * don't need this function if we use background svg image */
+    function drawBackground() {
+        background = document.createElement('div');
+        background.classList.add('gomokuBoardBackground');
+    }
+
     function drawBackLayer(size) {
         backLayer = document.createElement('div');
         backLayer.classList.add('gomokuBoardBackLayer');
@@ -13,19 +16,49 @@ const board = (() => {
                 const grid = document.createElement('div');
                 grid.classList.add('grid');
                 if (col > 0 && col < size * 2 - 1) {
-                    if (row % 2 === 0) grid.classList.add('borderBottom');
+                    if (row > 0 && row < (size - 1) * 2) {
+                        if (row % 2 === 0) grid.classList.add('borderBottom');
+                    }
                 }
                 if (row > 0 && row < size * 2 - 1) {
-                    if (col % 2 === 0)  grid.classList.add('borderRight');
+                    if (col > 0 && col < (size - 1) * 2) {
+                        if (col % 2 === 0)  grid.classList.add('borderRight');
+                    }
                 }
                 backLayer.appendChild(grid);
             }
         }
     }
 
+    function drawMidLayer() {
+        midLayer = document.createElement('div');
+        midLayer.classList.add('gomokuBoardMidLayer');
+        const dot1 = document.createElement('div');
+        dot1.classList.add('dot');
+        dot1.classList.add('dot1');
+        const dot2 = document.createElement('div');
+        dot2.classList.add('dot');
+        dot2.classList.add('dot2');
+        const dot3 = document.createElement('div');
+        dot3.classList.add('dot');
+        dot3.classList.add('dot3');
+        const dot4 = document.createElement('div');
+        dot4.classList.add('dot');
+        dot4.classList.add('dot4');
+        const dot5 = document.createElement('div');
+        dot5.classList.add('dot');
+        dot5.classList.add('dot5');
+        midLayer.appendChild(dot1);
+        midLayer.appendChild(dot2);
+        midLayer.appendChild(dot3);
+        midLayer.appendChild(dot4);
+        midLayer.appendChild(dot5);
+    }
+
     function drawFrontLayer(size) {
         frontLayer = document.createElement('div');
         frontLayer.classList.add('gomokuBoardFrontLayer');
+        frontLayer.classList.add('showNumber');
         for (let row = 0; row < size; row++) {
             for (let col = 0; col < size; col++) {
                 const grid = document.createElement('div');
@@ -37,6 +70,10 @@ const board = (() => {
         }
         initPhantomPiece();
         initRealPiece();
+    }
+
+    function toggleNumber() {
+        frontLayer.classList.toggle('showNumber');
     }
 
     function initPhantomPiece() {
@@ -65,8 +102,12 @@ const board = (() => {
         document.querySelector(':root').style.setProperty('--gomoku-size', size);
         board = document.createElement('div');
         board.classList.add('gomokuBoard');
+        drawBackground();
+        board.appendChild(background);
         drawBackLayer(size);
         board.appendChild(backLayer);
+        drawMidLayer(size);
+        board.appendChild(midLayer);
         drawFrontLayer(size);
         board.appendChild(frontLayer);
     }
@@ -76,13 +117,13 @@ const board = (() => {
     }
 
     function gridIsEmpty(grid) {
-        const content = grid.querySelector('img:not(.phantom)');
+        const content = grid.querySelector('.piece:not(.phantom)');
         if (content) return false;
         return true;
     }
 
     function gridHasPhantomPiece(grid) {
-        const content = grid.querySelector('img.phantom');
+        const content = grid.querySelector('.piece.phantom');
         if (content) return true;
         return false;
     }
@@ -95,23 +136,27 @@ const board = (() => {
         return result;
     }
 
-    return { draw, getBoard, gridIsEmpty, gridHasPhantomPiece, getGrid };
+    return { draw, toggleNumber, getBoard, gridIsEmpty, gridHasPhantomPiece, getGrid };
 
 })();
 
 /* player factory function 
  * piece is the path to the piece image */
-const player = function(playerName, pieceImg) {
+const player = function(playerName, pieceColor) {
     const name = playerName;
-    const piece = pieceImg;
+    const piece = pieceColor;
+    // const pieceSound = new Audio('./assets/sound/cool_interface_click.wav');
+    // const pieceSound = new Audio('./assets/sound/negative_tone_interface_tap.wav');
+    const pieceSound = new Audio('./assets/sound/modern_technology_select.wav');
 
     function getName() {
         return name;
     }
 
     function createPiece() {
-        const newPiece = document.createElement('img');
-        newPiece.src = piece;
+        const newPiece = document.createElement('div');
+        newPiece.classList.add('piece');
+        newPiece.classList.add(piece);
         return newPiece;
     }
 
@@ -134,7 +179,7 @@ const player = function(playerName, pieceImg) {
     }
 
     function removePhantomPiece(grid) {
-        const piece = grid.querySelector('img.phantom');
+        const piece = grid.querySelector('.phantom');
         if (piece) grid.removeChild(piece);
     }
 
@@ -144,7 +189,8 @@ const player = function(playerName, pieceImg) {
             removePhantomPiece.call(this, grid);
             grid.appendChild(newPiece);
             addIntoPieceMap.call(this, grid);
-            game.cachePieces(grid);
+            game.cachePieces(grid, newPiece);
+            playSound();
             if (checkWin.call(this)) {
                 game.announceWinner(this);
             }
@@ -152,8 +198,13 @@ const player = function(playerName, pieceImg) {
         }
     }
 
+    function playSound() {
+        pieceSound.currentTime = 0;
+        pieceSound.play();
+    }
+
     function removeRealPiece(grid) {
-        const piece = grid.querySelector('img');
+        const piece = grid.querySelector('.piece');
         if (piece) grid.removeChild(piece);
         removeFromPieceMap.call(this, grid);
     }
@@ -220,8 +271,8 @@ const player = function(playerName, pieceImg) {
 };
 
 const players = (() => {
-    const blackPiece = './assets/img/black_piece.svg';
-    const whitePiece = './assets/img/white_piece.svg';
+    const blackPiece = 'black';
+    const whitePiece = 'white';
     const players = [player('Black', blackPiece), player('White', whitePiece)]; 
     let currentPlayer = 0;
 
@@ -243,9 +294,12 @@ const players = (() => {
 const controllers = (() => {
     const rollBackController = createRollBackController();
     const restartController = createRestartController();
+    const toggleNumberController = createToggleNumberController();
+    const announceWinnerController = createAnnounceWinnerController();
 
     function createRollBackController() {
-        const btn = document.createElement('button');
+        const btn = document.createElement('div');
+        btn.classList.add('gomokuBtn');
         btn.classList.add('gomokuRollBackBtn');
         btn.textContent = 'Back';
         btn.addEventListener('click', () => game.rollBack());
@@ -253,14 +307,58 @@ const controllers = (() => {
     }
 
     function createRestartController() {
-        const btn = document.createElement('button');
+        const btn = document.createElement('div');
+        btn.classList.add('gomokuBtn');
         btn.classList.add('gomokuRestartBtn');
         btn.textContent = 'Restart';
         btn.addEventListener('click', () => game.restart());
         return btn;
     }
 
-    return { rollBackController, restartController };
+    function createToggleNumberController() {
+        const btn = document.createElement('div');
+        btn.classList.add('gomokuBtn');
+        btn.classList.add('gomokuToggleNumberBtn');
+        btn.textContent = 'Number Off';
+        btn.addEventListener('click', () => { 
+            board.toggleNumber();
+            if (btn.textContent === 'Number Off') {
+                btn.textContent = 'Show Number';
+            } else {
+                btn.textContent = 'Number Off';
+            }
+        });
+        return btn;
+    }
+
+    function createAnnounceWinnerController() {
+        const announceVictorDiv = document.createElement('div');
+        announceVictorDiv.classList.add('gomokuAnnounceWinner');
+        const inner = document.createElement('div');
+        inner.classList.add('inner'); 
+        announceVictorDiv.appendChild(inner);
+        const p = document.createElement('p');
+        p.classList.add('text');
+        inner.appendChild(p);
+        const btns = document.createElement('div');
+        btns.classList.add('btns');
+        const confirm = document.createElement('div');
+        confirm.classList.add('gomokuBtn'); 
+        confirm.classList.add('confirm'); 
+        confirm.textContent = 'Wow!';
+        confirm.addEventListener('click', () => toggleAnnounceWinnerController(''));
+        btns.appendChild(confirm);
+        inner.appendChild(btns);
+        return announceVictorDiv;
+    }
+
+    function toggleAnnounceWinnerController(text) {
+        const p = announceWinnerController.querySelector('.text');
+        p.textContent = text;
+        announceWinnerController.classList.toggle('show');
+    }
+
+    return { rollBackController, restartController, toggleNumberController, announceWinnerController, toggleAnnounceWinnerController };
 })();
 
 const game = (() => {
@@ -277,8 +375,9 @@ const game = (() => {
         return ++id;
     }
 
-    function cachePieces(grid) {
+    function cachePieces(grid, piece) {
         pieces.push({id: nextId(), row: grid.dataset.row, col: grid.dataset.col});
+        piece.textContent = pieces.length;
     }
 
     function rollBack() {
@@ -295,7 +394,7 @@ const game = (() => {
     }
 
     function announceWinner(winner) {
-        alert(`${winner.getName()} win!`);
+        controllers.toggleAnnounceWinnerController(`${winner.getName()} win, congratulation!`);
     }
 
     return { initPiecesCache, cachePieces, rollBack, restart, announceWinner };
@@ -304,23 +403,19 @@ const game = (() => {
 
 
 /* API */
-export default (() => {
-    function initModules(size) {
+export const gomoku = (() => {
+    let gomokuBoard = undefined;
+    const rollBack = controllers.rollBackController;
+    const restart = controllers.restartController;
+    const toggleNumber = controllers.toggleNumberController;
+    const announceWinner = controllers.announceWinnerController;
+
+    function init(size) {
         board.draw(size);
         players.initPieceMap(size);
         game.initPiecesCache();
+        this.gomokuBoard = board.getBoard();
     }
 
-    function insertToWebPage(container) {
-        container.appendChild(controllers.rollBackController);
-        container.appendChild(controllers.restartController);
-        container.appendChild(board.getBoard());
-    }
-
-    function init(size, container) {
-        initModules(size);        
-        insertToWebPage(container);        
-    }
-
-    return { init };
+    return { init, gomokuBoard, rollBack, restart, toggleNumber, announceWinner };
 })();

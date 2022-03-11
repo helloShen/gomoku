@@ -1,2 +1,24 @@
 @import url(./norm.css);
 @import url(./gomoku.css);
+
+body {
+    display: grid;
+    align-items: center;
+    justify-items: center;
+}
+
+.container {
+    position: relative;
+    display: grid;
+    align-items: center;
+    justify-items: center;
+    /* background-image: url('../assets/img/back.jpeg'); */
+    /* background-size: contain; */
+    /* background: radial-gradient(#ffffff,#B2B2B2); */
+    /* background-color: #ffbf00; */
+}
+
+.backImg {
+    transform: translateX(-300px) translateY(-600px);
+}
+
