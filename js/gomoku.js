@@ -2,6 +2,17 @@
 const board = (() => {
 
     let board, frontLayer, midLayer, backLayer, background = undefined;
+    const wrapper = createBoardWrapper();
+
+    function createBoardWrapper() {
+        const target = document.createElement('div');
+        target.classList.add('gomokuBoardWrapper');
+        return target;
+    }
+
+    function getWrapper() {
+        return wrapper;
+    }
 
     function drawBackground() {
         background = document.createElement('div');
@@ -136,18 +147,16 @@ const board = (() => {
         return result;
     }
 
-    return { draw, toggleNumber, getBoard, gridIsEmpty, gridHasPhantomPiece, getGrid };
+    return { draw, toggleNumber, getBoard, gridIsEmpty, gridHasPhantomPiece, getGrid, getWrapper };
 
 })();
 
 /* player factory function 
  * piece is the path to the piece image */
-const player = function(playerName, pieceColor) {
-    const name = playerName;
-    const piece = pieceColor;
-    // const pieceSound = new Audio('./assets/sound/cool_interface_click.wav');
-    // const pieceSound = new Audio('./assets/sound/negative_tone_interface_tap.wav');
-    const pieceSound = new Audio('./assets/sound/modern_technology_select.wav');
+const player = function(inName, inColor, inSound) {
+    const name = inName;
+    const pieceColor = inColor;  
+    const pieceSound = inSound;
 
     function getName() {
         return name;
@@ -156,7 +165,7 @@ const player = function(playerName, pieceColor) {
     function createPiece() {
         const newPiece = document.createElement('div');
         newPiece.classList.add('piece');
-        newPiece.classList.add(piece);
+        newPiece.classList.add(pieceColor);
         return newPiece;
     }
 
@@ -172,7 +181,7 @@ const player = function(playerName, pieceColor) {
     }
 
     function placePhantomPiece(grid) {
-        if (board.gridIsEmpty(grid)) {
+        if (!game.hasWinner() && board.gridIsEmpty(grid)) {
             const newPiece = createPhantomPiece.call(this);
             grid.appendChild(newPiece);
         }
@@ -184,13 +193,13 @@ const player = function(playerName, pieceColor) {
     }
 
     function placeRealPiece(grid) {
-        if (board.gridIsEmpty(grid)) {
+        if (!game.hasWinner() && board.gridIsEmpty(grid)) {
             const newPiece = createRealPiece.call(this);
             removePhantomPiece.call(this, grid);
             grid.appendChild(newPiece);
             addIntoPieceMap.call(this, grid);
             game.cachePieces(grid, newPiece);
-            playSound();
+            playPieceSound();
             if (checkWin.call(this)) {
                 game.announceWinner(this);
             }
@@ -198,7 +207,7 @@ const player = function(playerName, pieceColor) {
         }
     }
 
-    function playSound() {
+    function playPieceSound() {
         pieceSound.currentTime = 0;
         pieceSound.play();
     }
@@ -271,9 +280,12 @@ const player = function(playerName, pieceColor) {
 };
 
 const players = (() => {
-    const blackPiece = 'black';
-    const whitePiece = 'white';
-    const players = [player('Black', blackPiece), player('White', whitePiece)]; 
+    const blackPieceColor = 'black';
+    const whitePieceColor = 'white';
+    const blackPieceSound = new Audio('./assets/sound/cool_interface_click.wav');
+    const whitePieceSound = new Audio('./assets/sound/modern_technology_select.wav');
+
+    const players = [player('Black', blackPieceColor, blackPieceSound), player('White', whitePieceColor, whitePieceSound)]; 
     let currentPlayer = 0;
 
     function alternatePlayer() {
@@ -292,10 +304,7 @@ const players = (() => {
 })();
 
 const controllers = (() => {
-    const rollBackController = createRollBackController();
-    const restartController = createRestartController();
-    const toggleNumberController = createToggleNumberController();
-    const announceWinnerController = createAnnounceWinnerController();
+    const bank = { 'announceWinner': createAnnounceWinnerController() }; // lazy initialization
 
     function createRollBackController() {
         const btn = document.createElement('div');
@@ -306,6 +315,11 @@ const controllers = (() => {
         return btn;
     }
 
+    function getRollBackController() {
+        if (!bank['rollBack']) bank['rollBack'] = createRollBackController();
+        return bank['rollBack'];
+    }
+
     function createRestartController() {
         const btn = document.createElement('div');
         btn.classList.add('gomokuBtn');
@@ -313,6 +327,11 @@ const controllers = (() => {
         btn.textContent = 'Restart';
         btn.addEventListener('click', () => game.restart());
         return btn;
+    }
+
+    function getRestartController() {
+        if (!bank['restart']) bank['restart'] = createRestartController();
+        return bank['restart'];
     }
 
     function createToggleNumberController() {
@@ -331,48 +350,86 @@ const controllers = (() => {
         return btn;
     }
 
+    function getToggleNumberController() {
+        if (!bank['toggleNumber']) bank['toggleNumber'] = createToggleNumberController();
+        return bank['toggleNumber'];
+    }
+
     function createAnnounceWinnerController() {
-        const announceVictorDiv = document.createElement('div');
-        announceVictorDiv.classList.add('gomokuAnnounceWinner');
+        const announceWinnerDiv = document.createElement('div');
+        announceWinnerDiv.classList.add('gomokuAnnounceWinner');
         const inner = document.createElement('div');
         inner.classList.add('inner'); 
-        announceVictorDiv.appendChild(inner);
+        announceWinnerDiv.appendChild(inner);
+        /* trophy */
+        const trophyDiv = document.createElement('div');
+        trophyDiv.classList.add('trophy');
+        const trophy = document.createElement('img');
+        trophy.src = './assets/img/winner.png';
+        trophyDiv.appendChild(trophy);
+        inner.appendChild(trophyDiv);
+        /* text */
         const p = document.createElement('p');
         p.classList.add('text');
         inner.appendChild(p);
+        /* btns */
         const btns = document.createElement('div');
         btns.classList.add('btns');
         const confirm = document.createElement('div');
         confirm.classList.add('gomokuBtn'); 
         confirm.classList.add('confirm'); 
         confirm.textContent = 'Wow!';
-        confirm.addEventListener('click', () => toggleAnnounceWinnerController(''));
+        confirm.addEventListener('click', () => bank['announceWinner'].remove());
         btns.appendChild(confirm);
         inner.appendChild(btns);
-        return announceVictorDiv;
+        return announceWinnerDiv;
     }
 
-    function toggleAnnounceWinnerController(text) {
-        const p = announceWinnerController.querySelector('.text');
-        p.textContent = text;
-        announceWinnerController.classList.toggle('show');
+    /* announce winner controller is always available */
+    function getAnnounceWinnerController() {
+        return bank['announceWinner'];
     }
 
-    return { rollBackController, restartController, toggleNumberController, announceWinnerController, toggleAnnounceWinnerController };
+    function createResizeController(size) {
+        const btn = document.createElement('div');
+        btn.classList.add('gomokuBtn');
+        btn.classList.add(`gomokuResize${size}`);
+        btn.textContent = `${size} × ${size}`;
+        btn.addEventListener('click', () => game.reset(size), false);
+        return btn;
+    }
+
+    function getResizeController(size) {
+        if (!bank[`resize_${size}`]) bank[`resize_${size}`] = createResizeController(size);
+        return bank[`resize_${size}`];
+    }
+
+    return { getRollBackController, getRestartController, getToggleNumberController, getAnnounceWinnerController, getResizeController };
 })();
 
 const game = (() => {
 
-    let pieces = undefined;
-    let id = undefined;
+    let pieces = undefined; // cache all placed pieces by two players
+    let piecesId = undefined;
+    let winner = undefined;
+    const victorySounds = initVictorySounds();
+
+    /* Create a bank of victory sounds. */
+    function initVictorySounds() {
+        const sounds = [];
+        sounds.push(new Audio('./assets/sound/completion-of-a-level.wav'));
+        sounds.push(new Audio('./assets/sound/game-level-completed.wav'));
+        sounds.push(new Audio('./assets/sound/game-experience-level-increased.wav'));
+        return sounds;
+    }
 
     function initPiecesCache() {
         pieces = [];
-        id = 0;
+        piecesId = 0;
     }
 
     function nextId() {
-        return ++id;
+        return ++piecesId;
     }
 
     function cachePieces(grid, piece) {
@@ -387,35 +444,122 @@ const game = (() => {
             players.alternatePlayer();
             players.getCurrentPlayer().removeRealPiece(grid);
         }
+        if (hasWinner.call(this)) removeWinner.call(this);
     }
 
+    /* to save resource we don't reset the game, just roll back to the round 1 */
     function restart() {
         while (pieces.length > 0) rollBack();
     }
 
-    function announceWinner(winner) {
-        controllers.toggleAnnounceWinnerController(`${winner.getName()} win, congratulation!`);
+    /* Check user plugin first. If not any, use local default announce winner controller. */
+    function announceWinner(gameWinner) {
+        winner = gameWinner;
+        const congratulation = `${winner.getName()} win. Congratulation!`;
+        if (plugins.hasPlugin('announceWinner')) {
+            plugins.getPlugin('announceWinner')(congratulation);
+        } else {
+            defaultAnnounceWinner(congratulation);        
+        }
     }
 
-    return { initPiecesCache, cachePieces, rollBack, restart, announceWinner };
-})();
+    function defaultAnnounceWinner(congratulation) {
+        const target = controllers.getAnnounceWinnerController();
+        const p = target.querySelector('.text');
+        p.textContent = congratulation;
+        const body = document.querySelector('body');
+        body.appendChild(target);
+        playVicotrySound();
+    }
 
+    function playVicotrySound() {
+        victorySounds.forEach(sound => sound.currentTime = 0);
+        const r = Math.floor(Math.random() * 3);
+        victorySounds[r].play();
+    }
 
+    function hasWinner() {
+        if (winner) return true;
+        return false;
+    }
 
-/* API */
-export const gomoku = (() => {
-    let gomokuBoard = undefined;
-    const rollBack = controllers.rollBackController;
-    const restart = controllers.restartController;
-    const toggleNumber = controllers.toggleNumberController;
-    const announceWinner = controllers.announceWinnerController;
+    function removeWinner() {
+        winner = undefined;
+    }
 
+    /* initialize a game */
     function init(size) {
         board.draw(size);
         players.initPieceMap(size);
-        game.initPiecesCache();
-        this.gomokuBoard = board.getBoard();
+        initPiecesCache();
     }
 
-    return { init, gomokuBoard, rollBack, restart, toggleNumber, announceWinner };
+    /* Remove the old board, and insert a new board of another size, and start a new game. */
+    function reset(size) {
+        board.getBoard().remove();
+        init(size);
+        board.getWrapper().appendChild(board.getBoard());
+    }
+
+    return { cachePieces, rollBack, restart, announceWinner, hasWinner, removeWinner, init, reset };
+})();
+
+/* Allow user to register personal customized plugins */
+const plugins = (() => {
+    const plugins = {};
+    
+    function register(name, obj) {
+        plugins[`${name}`] = obj;
+    }
+
+    function hasPlugin(name) {
+        if(plugins[`${name}`]) return true;
+        return false;
+    }
+
+    function getPlugin(name) {
+        return plugins[`${name}`];
+    }
+
+    return { register, hasPlugin, getPlugin };
+})();
+
+/* API */
+export const gomoku = (() => {
+
+    function insertBoard(container) {
+        const wrapper = board.getWrapper();
+        wrapper.appendChild(board.getBoard());
+        container.appendChild(wrapper);
+    }
+
+    function insertRollBackController(container) {
+        container.appendChild(controllers.getRollBackController());
+    }
+
+    function insertRestartController(container) {
+        container.appendChild(controllers.getRestartController());
+    }
+
+    function insertToggleNumberController(container) {
+        container.appendChild(controllers.getToggleNumberController());
+    }
+
+    function insertResizeController(container, size) {
+        container.appendChild(controllers.getResizeController(size));
+    }
+
+    /* User must call this function first to initialize the game and all controllers */
+    function init(size) {
+        game.init(size);
+    }
+
+    /* Optional API */
+    /* User can provide their own function of showing winner.
+     * The "fn" function should recieve a string as argument */
+    function registerAnnounceWinner(fn) {
+        plugins.register('announceWinner', fn);
+    } 
+
+    return { init, insertBoard, insertRollBackController, insertRestartController, insertToggleNumberController, insertResizeController, registerAnnounceWinner };
 })();

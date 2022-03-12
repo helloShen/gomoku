@@ -1,9 +1,14 @@
 import { gomoku } from './gomoku.js';
 
-gomoku.init(15);
+function alertWinner(winnerText) {
+    alert(winnerText);
+}
 const container = document.querySelector('.container'); 
-container.appendChild(gomoku.rollBack);
-container.appendChild(gomoku.restart);
-container.appendChild(gomoku.toggleNumber);
-container.appendChild(gomoku.announceWinner);
-container.appendChild(gomoku.gomokuBoard);
+
+gomoku.init(15);
+gomoku.insertRollBackController(container);
+gomoku.insertRestartController(container);
+gomoku.insertToggleNumberController(container);
+[9, 13, 15, 19].forEach(size => gomoku.insertResizeController(container, size));
+gomoku.insertBoard(container);
+// gomoku.registerAnnounceWinner(alertWinner);
