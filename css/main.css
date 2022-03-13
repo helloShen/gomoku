@@ -22,15 +22,17 @@ body {
 
 img.background1 {
     position: absolute;
+    width: 420px;
+    height: auto;
     top: 20px;
     left: 150px;
     z-index: -2;
 }
 
 img.background2 {
+    position: absolute;
     width: 300px;
     height: auto;
-    position: absolute;
     top: 120px;
     left: 720px;
     transform: rotate(120deg);
