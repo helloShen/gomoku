@@ -27,6 +27,8 @@ const initGomoku = (() => {
         initControllers();
     }
 
-    init();
+    return { init };
 
 })();
+
+initGomoku.init();
