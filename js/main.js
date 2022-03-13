@@ -1,15 +1,32 @@
 import { gomoku } from './gomoku.js';
 
-function alertWinner(winnerText) {
-    alert(winnerText);
-}
-const mid = document.querySelector('.gomoku>.mid'); 
-const left = document.querySelector('.gomoku>.left'); 
-const right = document.querySelector('.gomoku>.right'); 
+const initGomoku = (() => {
 
-gomoku.init(15);
-gomoku.insertRollBackController(right);
-gomoku.insertRestartController(right);
-gomoku.insertToggleNumberController(right);
-[9, 13, 15, 19].forEach(size => gomoku.insertResizeController(left, size));
-gomoku.insertBoard(mid);
+    /* configuration variables */
+    const defaultSize = 15;
+    const optionalSize = [9, 13, 15, 19];
+    /* containers */
+    const board = document.querySelector('.gomoku > .board'); 
+    const controlBar = document.querySelector('.gomoku > .left > .bar > .control');
+    const resizeBar = document.querySelector('.gomoku > .left > .bar > .resize');
+
+    function initGame() {
+        gomoku.init(defaultSize);
+    }
+
+    function initControllers() {
+        gomoku.insertRollBackController(controlBar);
+        gomoku.insertRestartController(controlBar);
+        gomoku.insertToggleNumberController(controlBar);
+        optionalSize.forEach(size => gomoku.insertResizeController(resizeBar, size));
+        gomoku.insertBoard(board);
+    }
+
+    function init() {
+        initGame();
+        initControllers();
+    }
+
+    init();
+
+})();

@@ -1,14 +1,17 @@
 @import url(./norm.css);
 @import url(./gomoku.css);
 @import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
 :root {
-    --white: #FAF8FF;
+    --white: #FFFFFF;
     --gray-100: #E5E5E5;
     --gray-300: #B2B2B2;
     --gray-500: #838383;
     --gray-700: #565656;
-    --black: #2C2C2C;
+    --black: #000000;
+    --black-translucent: #000000AA;
+    --white-translucent: #FFFFFFAA;
 }
 
 body {
@@ -65,13 +68,65 @@ img.background2 {
 }
 
 .gomoku {
+    padding: 0 5rem;
     display: grid;
-    grid-template-columns: auto 40rem auto;
-    gap: 1rem;
+    grid-template-columns: 10rem 36rem 10rem;
     justify-content: center;
+    gap: 1rem;
 }
 
-.gomoku > .mid {
+.bar {
+    width: 10rem;
+    padding: 1rem 0;
+    background-color: var(--white-translucent);
+    border-right: 2px solid var(--black);
+    display: grid;
+    align-items: center;
+    justify-items: center;
+}
+
+.bar .player {
+    --piece-size: 3rem;
+    height: var(--piece-size);
+    width: 8rem;
+    margin: 1rem 0;
+    display: grid;
+    grid-template-columns: var(--piece-size) var(--piece-size);
+    justify-content: space-around;
+}
+
+.bar .player .black,
+.bar .player .white {
+    height: var(--piece-size);
+    width: var(--piece-size);
+    border-radius: calc(var(--piece-size) / 2);
+    font-size: .75rem;
+    font-weight: bold;
+    display: grid;
+    align-items: center;
+    justify-items: center;
+}
+
+.bar .player .black {
+    color: var(--white);
+    background-color: var(--black);
+}
+
+.bar .player .white {
+    color: var(--black);
+    border: 2px solid var(--black);
+    background-color: var(--white);
+}
+
+.bar > .title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    color: var(--black);
+    margin-top: 1rem;
+}
+
+.gomoku > .board {
+    justify-self: center;
     display: grid;
     justify-items: center;
 }
@@ -111,10 +166,10 @@ img.background2 {
     width: auto;
 }
 
-.gomokuBtn.btn-sm {
-    /* opacity: 90%; */
-}
 
+.gomokuBtn.btn-lg {
+    margin: 1rem;
+}
 
 
 

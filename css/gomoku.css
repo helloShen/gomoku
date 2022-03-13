@@ -238,9 +238,6 @@
 }
 
 .gomokuBtn {
-    height: 2.5rem;
-    padding: .5rem 1rem;
-    margin: .5rem;
     font-size: .75rem;
     font-family: 'Poppins', sans-serif;
     font-weight: bold;
@@ -255,7 +252,7 @@
 }
 
 .gomokuBtn:hover {
-    background-color: var(--gomoku-gray-500);
+    background-color: var(--gomoku-gray-700);
 }
 
 .gomokuBtn:active,
@@ -266,11 +263,17 @@
 }
 
 .gomokuBtn.btn-lg {
+    height: 2.5rem;
     width: 8rem;
+    padding: .5rem 1rem;
+    margin: 1rem;
 }
 
 .gomokuBtn.btn-sm {
+    height: 2rem;
     width: 6rem;
+    padding: .25rem .5rem;
+    margin: .5rem;
 }
 
 
