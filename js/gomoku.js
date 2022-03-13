@@ -1,7 +1,7 @@
 /* board module */
 const board = (() => {
 
-    let board, frontLayer, midLayer, backLayer, background = undefined;
+    let boardSize, board, frontLayer, midLayer, backLayer, background = undefined;
     const wrapper = createBoardWrapper();
 
     function createBoardWrapper() {
@@ -110,6 +110,7 @@ const board = (() => {
     }
 
     function draw(size) {
+        boardSize = size;
         document.querySelector(':root').style.setProperty('--gomoku-size', size);
         board = document.createElement('div');
         board.classList.add('gomokuBoard');
@@ -282,8 +283,8 @@ const player = function(inName, inColor, inSound) {
 const players = (() => {
     const blackPieceColor = 'black';
     const whitePieceColor = 'white';
-    const blackPieceSound = new Audio('./assets/sound/cool_interface_click.wav');
-    const whitePieceSound = new Audio('./assets/sound/modern_technology_select.wav');
+    const blackPieceSound = new Audio('./assets/gomoku/sound/blackPieceSound.wav');
+    const whitePieceSound = new Audio('./assets/gomoku/sound/whitePieceSound.wav');
 
     const players = [player('Black', blackPieceColor, blackPieceSound), player('White', whitePieceColor, whitePieceSound)]; 
     let currentPlayer = 0;
@@ -305,13 +306,23 @@ const players = (() => {
 
 const controllers = (() => {
     const bank = { 'announceWinner': createAnnounceWinnerController() }; // lazy initialization
+    const clickSound = new Audio('./assets/gomoku/sound/buttonClick.wav');
+
+    function playClickSound() {
+        clickSound.currentTime = 0;
+        clickSound.play();
+    }
 
     function createRollBackController() {
         const btn = document.createElement('div');
         btn.classList.add('gomokuBtn');
+        btn.classList.add('btn-lg');
         btn.classList.add('gomokuRollBackBtn');
-        btn.textContent = 'Back';
-        btn.addEventListener('click', () => game.rollBack());
+        btn.textContent = '<< Back';
+        btn.addEventListener('click', () => {
+            playClickSound();
+            game.rollBack()
+        }, false);
         return btn;
     }
 
@@ -323,9 +334,13 @@ const controllers = (() => {
     function createRestartController() {
         const btn = document.createElement('div');
         btn.classList.add('gomokuBtn');
+        btn.classList.add('btn-lg');
         btn.classList.add('gomokuRestartBtn');
         btn.textContent = 'Restart';
-        btn.addEventListener('click', () => game.restart());
+        btn.addEventListener('click', () => {
+            playClickSound();
+            game.restart()
+        }, false);
         return btn;
     }
 
@@ -337,9 +352,11 @@ const controllers = (() => {
     function createToggleNumberController() {
         const btn = document.createElement('div');
         btn.classList.add('gomokuBtn');
+        btn.classList.add('btn-lg');
         btn.classList.add('gomokuToggleNumberBtn');
         btn.textContent = 'Number Off';
         btn.addEventListener('click', () => { 
+            playClickSound();
             board.toggleNumber();
             if (btn.textContent === 'Number Off') {
                 btn.textContent = 'Show Number';
@@ -365,7 +382,7 @@ const controllers = (() => {
         const trophyDiv = document.createElement('div');
         trophyDiv.classList.add('trophy');
         const trophy = document.createElement('img');
-        trophy.src = './assets/img/winner.png';
+        trophy.src = './assets/gomoku/img/winner.png';
         trophyDiv.appendChild(trophy);
         inner.appendChild(trophyDiv);
         /* text */
@@ -377,6 +394,7 @@ const controllers = (() => {
         btns.classList.add('btns');
         const confirm = document.createElement('div');
         confirm.classList.add('gomokuBtn'); 
+        confirm.classList.add('btn-lg');
         confirm.classList.add('confirm'); 
         confirm.textContent = 'Wow!';
         confirm.addEventListener('click', () => bank['announceWinner'].remove());
@@ -393,9 +411,13 @@ const controllers = (() => {
     function createResizeController(size) {
         const btn = document.createElement('div');
         btn.classList.add('gomokuBtn');
+        btn.classList.add('btn-sm');
         btn.classList.add(`gomokuResize${size}`);
         btn.textContent = `${size} × ${size}`;
-        btn.addEventListener('click', () => game.reset(size), false);
+        btn.addEventListener('click', () => {
+            playClickSound();
+            game.reset(size)
+        }, false);
         return btn;
     }
 
@@ -417,9 +439,9 @@ const game = (() => {
     /* Create a bank of victory sounds. */
     function initVictorySounds() {
         const sounds = [];
-        sounds.push(new Audio('./assets/sound/completion-of-a-level.wav'));
-        sounds.push(new Audio('./assets/sound/game-level-completed.wav'));
-        sounds.push(new Audio('./assets/sound/game-experience-level-increased.wav'));
+        sounds.push(new Audio('./assets/gomoku/sound/victory1.wav'));
+        sounds.push(new Audio('./assets/gomoku/sound/victory2.wav'));
+        sounds.push(new Audio('./assets/gomoku/sound/victory3.wav'));
         return sounds;
     }
 
@@ -492,6 +514,7 @@ const game = (() => {
         board.draw(size);
         players.initPieceMap(size);
         initPiecesCache();
+        if(winner) winner = undefined;
     }
 
     /* Remove the old board, and insert a new board of another size, and start a new game. */

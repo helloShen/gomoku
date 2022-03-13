@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
 /* normalization */
 *,
 *::before,
@@ -237,10 +239,11 @@
 
 .gomokuBtn {
     height: 2.5rem;
-    width: 10rem;
     padding: .5rem 1rem;
     margin: .5rem;
-    font-size: 1rem;
+    font-size: .75rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: bold;
     color: var(--gomoku-white);
     background-color: var(--gomoku-black);
     border-radius: .5rem;
@@ -252,5 +255,22 @@
 }
 
 .gomokuBtn:hover {
-    background-color: var(--gomoku-gray-700);
+    background-color: var(--gomoku-gray-500);
 }
+
+.gomokuBtn:active,
+.gomokuBtn.current {
+    background-color: var(--gomoku-white);
+    border: 3px solid var(--gomoku-black);
+    color: var(--gomoku-black);
+}
+
+.gomokuBtn.btn-lg {
+    width: 8rem;
+}
+
+.gomokuBtn.btn-sm {
+    width: 6rem;
+}
+
+
