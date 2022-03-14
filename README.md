@@ -15,6 +15,8 @@ Online Javascript Gomoku. Enjoy spare time with your friend. Online preview: [ci
 3. Call `gomoku` API in your own Javascript file as follow.
 
 ```js
+import { gomoku } from './gomoku.js';
+
 const defaultSize = 15;
 const optionalSize = [9, 11, 13, 15, 19];
 const container = document.querySelector('your-container');
