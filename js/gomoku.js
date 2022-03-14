@@ -27,14 +27,14 @@ const board = (() => {
                 const grid = document.createElement('div');
                 grid.classList.add('grid');
                 if (col > 0 && col < size * 2 - 1) {
-                    if (row > 0 && row < (size - 1) * 2) {
+                    // if (row > 0 && row < (size - 1) * 2) {
                         if (row % 2 === 0) grid.classList.add('borderBottom');
-                    }
+                    // }
                 }
                 if (row > 0 && row < size * 2 - 1) {
-                    if (col > 0 && col < (size - 1) * 2) {
+                    // if (col > 0 && col < (size - 1) * 2) {
                         if (col % 2 === 0)  grid.classList.add('borderRight');
-                    }
+                    // }
                 }
                 backLayer.appendChild(grid);
             }
@@ -301,7 +301,12 @@ const players = (() => {
         players.forEach(target => target.initPieceMap(size));
     }
 
-    return { alternatePlayer, getCurrentPlayer, initPieceMap };
+    function init(size) {
+        initPieceMap(size);
+        currentPlayer = 0; // always black plays first
+    }
+
+    return { alternatePlayer, getCurrentPlayer, init };
 })();
 
 const controllers = (() => {
@@ -374,6 +379,7 @@ const controllers = (() => {
 
     function createAnnounceWinnerController() {
         const announceWinnerDiv = document.createElement('div');
+        announceWinnerDiv.classList.add('gomokuPromptForm');
         announceWinnerDiv.classList.add('gomokuAnnounceWinner');
         const inner = document.createElement('div');
         inner.classList.add('inner'); 
@@ -416,9 +422,55 @@ const controllers = (() => {
         btn.textContent = `${size} × ${size}`;
         btn.addEventListener('click', () => {
             playClickSound();
-            game.reset(size)
+            promptResizeConfirmController(size);
         }, false);
         return btn;
+    }
+
+    function createResizeConfirmController(size) {
+        const form = document.createElement('div');
+        form.classList.add('gomokuPromptForm');
+        form.classList.add('gomokuResizeConfirm');
+        const inner = document.createElement('div');
+        inner.classList.add('inner');
+        form.appendChild(inner);
+        const p = document.createElement('p');
+        p.textContent = 'End the current game and create a new board?';
+        const btns = document.createElement('div');
+        btns.classList.add('btns');
+        const confirm = document.createElement('div');
+        confirm.classList.add('gomokuBtn');
+        confirm.classList.add('btn-sm');
+        confirm.classList.add('confirm');
+        confirm.textContent = 'Confirm';
+        confirm.addEventListener('click', () => { 
+            game.reset(size)
+            closeResizeConfirmController();
+        });
+        const cancel = document.createElement('div');
+        cancel.classList.add('gomokuBtn');
+        cancel.classList.add('btn-sm');
+        cancel.classList.add('cancel');
+        cancel.textContent = 'Cancel';
+        cancel.addEventListener('click', () => closeResizeConfirmController());
+        btns.appendChild(confirm);
+        btns.appendChild(cancel);
+        inner.appendChild(p);
+        inner.appendChild(btns);
+        return form;
+    }
+
+    function getResizeConfirmController(size) {
+        if (!bank[`resizeConfirm_${size}`]) bank[`resizeConfirm_${size}`] = createResizeConfirmController(size);
+        return bank[`resizeConfirm_${size}`];
+    }
+
+    function promptResizeConfirmController(size) {
+        document.querySelector('body').appendChild(getResizeConfirmController(size));
+    }
+
+    function closeResizeConfirmController() {
+        document.querySelector('.gomokuResizeConfirm').remove();
     }
 
     function getResizeController(size) {
@@ -454,8 +506,16 @@ const game = (() => {
         return ++piecesId;
     }
 
+    function highlightPiece(piece) {
+        if(pieces.length > 0) {
+            pieces[pieces.length - 1].obj.classList.remove('lastPiece');
+        }
+        piece.classList.add('lastPiece');
+    }
+
     function cachePieces(grid, piece) {
-        pieces.push({id: nextId(), row: grid.dataset.row, col: grid.dataset.col});
+        highlightPiece(piece);
+        pieces.push({id: nextId(), row: grid.dataset.row, col: grid.dataset.col, obj: piece});
         piece.textContent = pieces.length;
     }
 
@@ -467,6 +527,9 @@ const game = (() => {
             players.getCurrentPlayer().removeRealPiece(grid);
         }
         if (hasWinner.call(this)) removeWinner.call(this);
+        if (pieces.length > 0) {
+            highlightPiece(pieces[pieces.length - 1].obj);
+        }
     }
 
     /* to save resource we don't reset the game, just roll back to the round 1 */
@@ -512,7 +575,7 @@ const game = (() => {
     /* initialize a game */
     function init(size) {
         board.draw(size);
-        players.initPieceMap(size);
+        players.init(size);
         initPiecesCache();
         if(winner) winner = undefined;
     }

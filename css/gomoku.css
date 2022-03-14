@@ -25,8 +25,11 @@
     --gomoku-back-grid-radius: calc(var(--gomoku-grid-radius) / 2);
     --gomoku-back-grid-length: calc(var(--gomoku-back-grid-radius) * 2);
     /* colors */
-    --gomoku-board-yellow: #DCB35C;
-    --gomoku-board-golden: #ffbf00;
+    --gomoku-board-classic-yellow: #DCB35C;
+    --gomoku-board-golden-700: #a67c00;
+    --gomoku-board-golden-500: #ffbf00;
+    --gomoku-board-golden-300: #ffcf40;
+    --gomoku-board-golden-100: #ffdc73;
     --gomoku-white: #FAF8FF;
     --gomoku-gray-100: #E5E5E5;
     --gomoku-gray-300: #B2B2B2;
@@ -51,8 +54,10 @@
 .gomokuBoardBackground {
     grid-column: 1 / 2;
     grid-row: 1 / 2;
-    width: calc(calc(var(--gomoku-back-grid-length) * calc(calc(var(--gomoku-size) - 1) * 2)));
-    height: calc(calc(var(--gomoku-back-grid-length) * calc(calc(var(--gomoku-size) - 1) * 2))); 
+    width: calc(calc(var(--gomoku-back-grid-length) * calc(calc(var(--gomoku-size) - 0) * 2)));
+    /* width: calc(calc(var(--gomoku-back-grid-length) * calc(calc(var(--gomoku-size) - 1) * 2))); */
+    height: calc(calc(var(--gomoku-back-grid-length) * calc(calc(var(--gomoku-size) - 0) * 2))); 
+    /* height: calc(calc(var(--gomoku-back-grid-length) * calc(calc(var(--gomoku-size) - 1) * 2)));  */
     background-color: var(--gomoku-white);
     z-index: 1;
 }
@@ -80,8 +85,10 @@
     grid-column: 1 / 2;
     grid-row: 1 / 2;
     box-sizing: content-box;
-    width: calc(calc(var(--gomoku-back-grid-length) * calc(calc(var(--gomoku-size) - 1) * 2)));
-    height: calc(calc(var(--gomoku-back-grid-length) * calc(calc(var(--gomoku-size) - 1) * 2)));
+    width: calc(calc(var(--gomoku-back-grid-length) * calc(calc(var(--gomoku-size) - 0) * 2)));
+    /* width: calc(calc(var(--gomoku-back-grid-length) * calc(calc(var(--gomoku-size) - 1) * 2))); */
+    height: calc(calc(var(--gomoku-back-grid-length) * calc(calc(var(--gomoku-size) - 0) * 2)));
+    /* height: calc(calc(var(--gomoku-back-grid-length) * calc(calc(var(--gomoku-size) - 1) * 2))); */
     border: .25rem solid var(--gomoku-black);
     border-radius: .5rem;
     z-index: 3;
@@ -106,27 +113,27 @@
 
 .gomokuBoardMidLayer > .dot.dot2 {
     position: absolute;
-    top: calc(3 * var(--gomoku-grid-length));
-    left: calc(3 * var(--gomoku-grid-length));
+    top: calc(3.5 * var(--gomoku-grid-length));
+    left: calc(3.5 * var(--gomoku-grid-length));
     transform: translateX(calc(var(--dot-size) / -2)) translateY(calc(var(--dot-size) / -2));
 }
 
 .gomokuBoardMidLayer > .dot.dot3 {
     position: absolute;
-    top: calc(3 * var(--gomoku-grid-length));
-    right: calc(3 * var(--gomoku-grid-length));
+    top: calc(3.5 * var(--gomoku-grid-length));
+    right: calc(3.5 * var(--gomoku-grid-length));
     transform: translateX(calc(var(--dot-size) / 2)) translateY(calc(var(--dot-size) / -2));
 }
 .gomokuBoardMidLayer > .dot.dot4 {
     position: absolute;
-    bottom: calc(3 * var(--gomoku-grid-length));
-    left: calc(3 * var(--gomoku-grid-length));
+    bottom: calc(3.5 * var(--gomoku-grid-length));
+    left: calc(3.5 * var(--gomoku-grid-length));
     transform: translateX(calc(var(--dot-size) / -2)) translateY(calc(var(--dot-size) / 2));
 }
 .gomokuBoardMidLayer > .dot.dot5 {
     position: absolute;
-    bottom: calc(3 * var(--gomoku-grid-length));
-    right: calc(3 * var(--gomoku-grid-length));
+    bottom: calc(3.5 * var(--gomoku-grid-length));
+    right: calc(3.5 * var(--gomoku-grid-length));
     transform: translateX(calc(var(--dot-size) / 2)) translateY(calc(var(--dot-size) / 2));
 }
 
@@ -162,6 +169,10 @@
     justify-items: center;
 }
 
+.gomokuBoardFrontLayer > .grid > .piece.lastPiece {
+    border: 2px solid var(--gomoku-board-golden-500) !important;
+}
+
 .gomokuBoardFrontLayer > .grid > .piece.black {
     color: transparent;
     background-color: var(--gomoku-black);
@@ -185,7 +196,7 @@
     opacity: .5;
 }
 
-.gomokuAnnounceWinner {
+.gomokuPromptForm {
     position: fixed;
     top: 0;
     left: 0;
@@ -198,16 +209,32 @@
     justify-items: center;
 }
 
-.gomokuAnnounceWinner > .inner {
-    font-size: 1.25rem;
+.gomokuPromptForm > .inner {
+    font-size: 1rem;
     padding: 1rem 2rem;
     background-color: var(--gomoku-white);
     border-radius: .5rem;
     display: grid;
-    grid-template-columns: 16rem;
-    grid-template-rows: 6rem 2.5rem 4rem;
     align-items: center;
     justify-items: center;
+}
+
+.gomokuPromptForm .btns {
+    display: grid;
+    grid-auto-flow: column;
+    align-items: center;
+    justify-items: center;
+}
+
+.gomokuResizeConfirm > .inner {
+    grid-template-columns: 16rem;
+    grid-template-rows: 4.5rem 4.5rem;
+    /* animation: gomokuWinnerAnimation .5s ease-in forwards; */
+}
+
+.gomokuAnnounceWinner > .inner {
+    grid-template-columns: 16rem;
+    grid-template-rows: 6rem 2.5rem 4rem;
     animation: gomokuWinnerAnimation .5s ease-in forwards;
 }
 
@@ -222,19 +249,12 @@
 
 .gomokuAnnounceWinner .trophy {
     height: 6rem;
-    width: auto;
+    width: 6rem;
 }
 
 .gomokuAnnounceWinner .trophy > img {
     width: 100%;
     height: 100%;
-}
-
-.gomokuAnnounceWinner .btns {
-    display: grid;
-    grid-auto-flow: column;
-    align-items: center;
-    justify-items: center;
 }
 
 .gomokuBtn {
