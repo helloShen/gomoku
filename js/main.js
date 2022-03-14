@@ -4,7 +4,7 @@ const initGomoku = (() => {
 
     /* configuration variables */
     const defaultSize = 15;
-    const optionalSize = [9, 13, 15, 19];
+    const optionalSize = [9, 11, 13, 15, 19];
     /* containers */
     const board = document.querySelector('.gomoku > .board'); 
     const controlBar = document.querySelector('.gomoku > .left > .bar > .control');
