@@ -54,9 +54,9 @@
 .gomokuBoardBackground {
     grid-column: 1 / 2;
     grid-row: 1 / 2;
-    width: calc(calc(var(--gomoku-back-grid-length) * calc(calc(var(--gomoku-size) - 0) * 2)));
+    width: calc(calc(var(--gomoku-back-grid-length) * calc(var(--gomoku-size) * 2)));
     /* width: calc(calc(var(--gomoku-back-grid-length) * calc(calc(var(--gomoku-size) - 1) * 2))); */
-    height: calc(calc(var(--gomoku-back-grid-length) * calc(calc(var(--gomoku-size) - 0) * 2))); 
+    height: calc(calc(var(--gomoku-back-grid-length) * calc(var(--gomoku-size) * 2))); 
     /* height: calc(calc(var(--gomoku-back-grid-length) * calc(calc(var(--gomoku-size) - 1) * 2)));  */
     background-color: var(--gomoku-white);
     z-index: 1;
@@ -85,9 +85,9 @@
     grid-column: 1 / 2;
     grid-row: 1 / 2;
     box-sizing: content-box;
-    width: calc(calc(var(--gomoku-back-grid-length) * calc(calc(var(--gomoku-size) - 0) * 2)));
+    width: calc(calc(var(--gomoku-back-grid-length) * calc(var(--gomoku-size) * 2)));
     /* width: calc(calc(var(--gomoku-back-grid-length) * calc(calc(var(--gomoku-size) - 1) * 2))); */
-    height: calc(calc(var(--gomoku-back-grid-length) * calc(calc(var(--gomoku-size) - 0) * 2)));
+    height: calc(calc(var(--gomoku-back-grid-length) * calc(var(--gomoku-size) * 2)));
     /* height: calc(calc(var(--gomoku-back-grid-length) * calc(calc(var(--gomoku-size) - 1) * 2))); */
     border: .25rem solid var(--gomoku-black);
     border-radius: .5rem;
@@ -115,6 +115,8 @@
     position: absolute;
     top: calc(3.5 * var(--gomoku-grid-length));
     left: calc(3.5 * var(--gomoku-grid-length));
+    /* top: calc(3 * var(--gomoku-grid-length)); */
+    /* left: calc(3 * var(--gomoku-grid-length)); */
     transform: translateX(calc(var(--dot-size) / -2)) translateY(calc(var(--dot-size) / -2));
 }
 
@@ -122,22 +124,26 @@
     position: absolute;
     top: calc(3.5 * var(--gomoku-grid-length));
     right: calc(3.5 * var(--gomoku-grid-length));
+    /* top: calc(3 * var(--gomoku-grid-length)); */
+    /* right: calc(3 * var(--gomoku-grid-length)); */
     transform: translateX(calc(var(--dot-size) / 2)) translateY(calc(var(--dot-size) / -2));
 }
 .gomokuBoardMidLayer > .dot.dot4 {
     position: absolute;
     bottom: calc(3.5 * var(--gomoku-grid-length));
     left: calc(3.5 * var(--gomoku-grid-length));
+    /* bottom: calc(3 * var(--gomoku-grid-length)); */
+    /* left: calc(3 * var(--gomoku-grid-length)); */
     transform: translateX(calc(var(--dot-size) / -2)) translateY(calc(var(--dot-size) / 2));
 }
 .gomokuBoardMidLayer > .dot.dot5 {
     position: absolute;
     bottom: calc(3.5 * var(--gomoku-grid-length));
     right: calc(3.5 * var(--gomoku-grid-length));
+    /* bottom: calc(3 * var(--gomoku-grid-length)); */
+    /* right: calc(3 * var(--gomoku-grid-length)); */
     transform: translateX(calc(var(--dot-size) / 2)) translateY(calc(var(--dot-size) / 2));
 }
-
-
 
 .gomokuBoardFrontLayer {
     grid-column: 1 / 2;
@@ -169,8 +175,12 @@
     justify-items: center;
 }
 
-.gomokuBoardFrontLayer > .grid > .piece.lastPiece {
+.gomokuBoardFrontLayer > .grid > .piece.black.lastPiece {
     border: 2px solid var(--gomoku-board-golden-500) !important;
+}
+
+.gomokuBoardFrontLayer > .grid > .piece.white.lastPiece {
+    border: 2px solid var(--gomoku-board-golden-700) !important;
 }
 
 .gomokuBoardFrontLayer > .grid > .piece.black {

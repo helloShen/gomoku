@@ -69,8 +69,8 @@ img.background2 {
     font-family: 'Righteous', cursive;
     height: 2rem;
     font-size: 1.5rem;
-    /* color: var(--gomoku-board-golden-700); */
-    color: var(--black);
+    color: var(--gomoku-board-golden-700);
+    /* color: var(--black); */
     display: grid;
     align-items: center;
     justify-items: center;
