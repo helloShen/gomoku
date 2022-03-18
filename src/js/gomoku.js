@@ -1,3 +1,8 @@
+const Mustache = require('mustache');
+import templates from './gomokuTemplates.js';
+import assets from './gomokuAssets.js';
+import '../css/gomoku.css';
+
 /* board module */
 const board = (() => {
 
@@ -8,10 +13,6 @@ const board = (() => {
         const target = document.createElement('div');
         target.classList.add('gomokuBoardWrapper');
         return target;
-    }
-
-    function getWrapper() {
-        return wrapper;
     }
 
     function drawBackground() {
@@ -122,6 +123,11 @@ const board = (() => {
         board.appendChild(midLayer);
         drawFrontLayer(size);
         board.appendChild(frontLayer);
+        wrapper.appendChild(board);
+    }
+
+    function insertBoard(container) {
+        container.appendChild(wrapper);
     }
 
     function getBoard() {
@@ -148,16 +154,16 @@ const board = (() => {
         return result;
     }
 
-    return { draw, toggleNumber, getBoard, gridIsEmpty, gridHasPhantomPiece, getGrid, getWrapper };
+    return { draw, insertBoard, toggleNumber, getBoard, gridIsEmpty, gridHasPhantomPiece, getGrid };
 
 })();
 
 /* player factory function 
  * piece is the path to the piece image */
-const player = function(inName, inColor, inSound) {
+const player = function(inName, inColor, inAudio) {
     const name = inName;
     const pieceColor = inColor;  
-    const pieceSound = inSound;
+    const pieceAudio = inAudio;
 
     function getName() {
         return name;
@@ -200,7 +206,7 @@ const player = function(inName, inColor, inSound) {
             grid.appendChild(newPiece);
             addIntoPieceMap.call(this, grid);
             game.cachePieces(grid, newPiece);
-            playPieceSound();
+            playPieceAudio();
             if (checkWin.call(this)) {
                 game.announceWinner(this);
             }
@@ -208,9 +214,9 @@ const player = function(inName, inColor, inSound) {
         }
     }
 
-    function playPieceSound() {
-        pieceSound.currentTime = 0;
-        pieceSound.play();
+    function playPieceAudio() {
+        pieceAudio.currentTime = 0;
+        pieceAudio.play();
     }
 
     function removeRealPiece(grid) {
@@ -283,14 +289,15 @@ const player = function(inName, inColor, inSound) {
 const players = (() => {
     const blackPieceColor = 'black';
     const whitePieceColor = 'white';
-    const blackPieceSound = new Audio('./assets/gomoku/sound/blackPieceSound.wav');
-    const whitePieceSound = new Audio('./assets/gomoku/sound/whitePieceSound.wav');
+    const blackPieceAudio = assets.blackPieceAudio();
+    const whitePieceAudio = assets.whitePieceAudio();
 
-    const players = [player('Black', blackPieceColor, blackPieceSound), player('White', whitePieceColor, whitePieceSound)]; 
+    const players = [player('Black', blackPieceColor, blackPieceAudio), player('White', whitePieceColor, whitePieceAudio)]; 
     let currentPlayer = 0;
 
     function alternatePlayer() {
         currentPlayer = (currentPlayer + 1) % 2;
+        if (controllers.hasController('player')) controllers.togglePlayerController();
     }
 
     function getCurrentPlayer() {
@@ -309,193 +316,12 @@ const players = (() => {
     return { alternatePlayer, getCurrentPlayer, init };
 })();
 
-const controllers = (() => {
-    const bank = { 'announceWinner': createAnnounceWinnerController() }; // lazy initialization
-    const clickSound = new Audio('./assets/gomoku/sound/buttonClick.wav');
-
-    function playClickSound() {
-        clickSound.currentTime = 0;
-        clickSound.play();
-    }
-
-    function createRollBackController() {
-        const btn = document.createElement('div');
-        btn.classList.add('gomokuBtn');
-        btn.classList.add('btn-lg');
-        btn.classList.add('gomokuRollBackBtn');
-        btn.textContent = '<< Back';
-        btn.addEventListener('click', () => {
-            playClickSound();
-            game.rollBack()
-        }, false);
-        return btn;
-    }
-
-    function getRollBackController() {
-        if (!bank['rollBack']) bank['rollBack'] = createRollBackController();
-        return bank['rollBack'];
-    }
-
-    function createRestartController() {
-        const btn = document.createElement('div');
-        btn.classList.add('gomokuBtn');
-        btn.classList.add('btn-lg');
-        btn.classList.add('gomokuRestartBtn');
-        btn.textContent = 'Restart';
-        btn.addEventListener('click', () => {
-            playClickSound();
-            game.restart()
-        }, false);
-        return btn;
-    }
-
-    function getRestartController() {
-        if (!bank['restart']) bank['restart'] = createRestartController();
-        return bank['restart'];
-    }
-
-    function createToggleNumberController() {
-        const btn = document.createElement('div');
-        btn.classList.add('gomokuBtn');
-        btn.classList.add('btn-lg');
-        btn.classList.add('gomokuToggleNumberBtn');
-        btn.textContent = 'Number Off';
-        btn.addEventListener('click', () => { 
-            playClickSound();
-            board.toggleNumber();
-            if (btn.textContent === 'Number Off') {
-                btn.textContent = 'Show Number';
-            } else {
-                btn.textContent = 'Number Off';
-            }
-        });
-        return btn;
-    }
-
-    function getToggleNumberController() {
-        if (!bank['toggleNumber']) bank['toggleNumber'] = createToggleNumberController();
-        return bank['toggleNumber'];
-    }
-
-    function createAnnounceWinnerController() {
-        const announceWinnerDiv = document.createElement('div');
-        announceWinnerDiv.classList.add('gomokuPromptForm');
-        announceWinnerDiv.classList.add('gomokuAnnounceWinner');
-        const inner = document.createElement('div');
-        inner.classList.add('inner'); 
-        announceWinnerDiv.appendChild(inner);
-        /* trophy */
-        const trophyDiv = document.createElement('div');
-        trophyDiv.classList.add('trophy');
-        const trophy = document.createElement('img');
-        trophy.src = './assets/gomoku/img/winner.png';
-        trophyDiv.appendChild(trophy);
-        inner.appendChild(trophyDiv);
-        /* text */
-        const p = document.createElement('p');
-        p.classList.add('text');
-        inner.appendChild(p);
-        /* btns */
-        const btns = document.createElement('div');
-        btns.classList.add('btns');
-        const confirm = document.createElement('div');
-        confirm.classList.add('gomokuBtn'); 
-        confirm.classList.add('btn-lg');
-        confirm.classList.add('confirm'); 
-        confirm.textContent = 'Wow!';
-        confirm.addEventListener('click', () => bank['announceWinner'].remove());
-        btns.appendChild(confirm);
-        inner.appendChild(btns);
-        return announceWinnerDiv;
-    }
-
-    /* announce winner controller is always available */
-    function getAnnounceWinnerController() {
-        return bank['announceWinner'];
-    }
-
-    function createResizeController(size) {
-        const btn = document.createElement('div');
-        btn.classList.add('gomokuBtn');
-        btn.classList.add('btn-sm');
-        btn.classList.add(`gomokuResize${size}`);
-        btn.textContent = `${size} × ${size}`;
-        btn.addEventListener('click', () => {
-            playClickSound();
-            promptResizeConfirmController(size);
-        }, false);
-        return btn;
-    }
-
-    function createResizeConfirmController(size) {
-        const form = document.createElement('div');
-        form.classList.add('gomokuPromptForm');
-        form.classList.add('gomokuResizeConfirm');
-        const inner = document.createElement('div');
-        inner.classList.add('inner');
-        form.appendChild(inner);
-        const p = document.createElement('p');
-        p.textContent = 'End the current game and create a new board?';
-        const btns = document.createElement('div');
-        btns.classList.add('btns');
-        const confirm = document.createElement('div');
-        confirm.classList.add('gomokuBtn');
-        confirm.classList.add('btn-sm');
-        confirm.classList.add('confirm');
-        confirm.textContent = 'Confirm';
-        confirm.addEventListener('click', () => { 
-            game.reset(size)
-            closeResizeConfirmController();
-        });
-        const cancel = document.createElement('div');
-        cancel.classList.add('gomokuBtn');
-        cancel.classList.add('btn-sm');
-        cancel.classList.add('cancel');
-        cancel.textContent = 'Cancel';
-        cancel.addEventListener('click', () => closeResizeConfirmController());
-        btns.appendChild(confirm);
-        btns.appendChild(cancel);
-        inner.appendChild(p);
-        inner.appendChild(btns);
-        return form;
-    }
-
-    function getResizeConfirmController(size) {
-        if (!bank[`resizeConfirm_${size}`]) bank[`resizeConfirm_${size}`] = createResizeConfirmController(size);
-        return bank[`resizeConfirm_${size}`];
-    }
-
-    function promptResizeConfirmController(size) {
-        document.querySelector('body').appendChild(getResizeConfirmController(size));
-    }
-
-    function closeResizeConfirmController() {
-        document.querySelector('.gomokuResizeConfirm').remove();
-    }
-
-    function getResizeController(size) {
-        if (!bank[`resize_${size}`]) bank[`resize_${size}`] = createResizeController(size);
-        return bank[`resize_${size}`];
-    }
-
-    return { getRollBackController, getRestartController, getToggleNumberController, getAnnounceWinnerController, getResizeController };
-})();
-
 const game = (() => {
 
     let pieces = undefined; // cache all placed pieces by two players
     let piecesId = undefined;
     let winner = undefined;
-    const victorySounds = initVictorySounds();
-
-    /* Create a bank of victory sounds. */
-    function initVictorySounds() {
-        const sounds = [];
-        sounds.push(new Audio('./assets/gomoku/sound/victory1.wav'));
-        sounds.push(new Audio('./assets/gomoku/sound/victory2.wav'));
-        sounds.push(new Audio('./assets/gomoku/sound/victory3.wav'));
-        return sounds;
-    }
+    const victoryAudios = assets.victoryAudios();
 
     function initPiecesCache() {
         pieces = [];
@@ -549,18 +375,17 @@ const game = (() => {
     }
 
     function defaultAnnounceWinner(congratulation) {
-        const target = controllers.getAnnounceWinnerController();
-        const p = target.querySelector('.text');
+        const element = controllers.getAnnounceWinnerController();
+        const p = element.querySelector('.text');
         p.textContent = congratulation;
-        const body = document.querySelector('body');
-        body.appendChild(target);
-        playVicotrySound();
+        document.body.appendChild(element);
+        playVicotryAudio();
     }
 
-    function playVicotrySound() {
-        victorySounds.forEach(sound => sound.currentTime = 0);
+    function playVicotryAudio() {
+        victoryAudios.forEach(audio => audio.currentTime = 0);
         const r = Math.floor(Math.random() * 3);
-        victorySounds[r].play();
+        victoryAudios[r].play();
     }
 
     function hasWinner() {
@@ -578,13 +403,13 @@ const game = (() => {
         players.init(size);
         initPiecesCache();
         if(winner) winner = undefined;
+        if (controllers.hasController('player')) controllers.resetPlayerController();
     }
 
     /* Remove the old board, and insert a new board of another size, and start a new game. */
     function reset(size) {
         board.getBoard().remove();
         init(size);
-        board.getWrapper().appendChild(board.getBoard());
     }
 
     return { cachePieces, rollBack, restart, announceWinner, hasWinner, removeWinner, init, reset };
@@ -610,13 +435,229 @@ const plugins = (() => {
     return { register, hasPlugin, getPlugin };
 })();
 
+const controllers = (() => {
+    const bank = {}; // lazy initialization
+    const clickAudio = assets.clickAudio();
+
+    function playClickAudio() {
+        clickAudio.currentTime = 0;
+        clickAudio.play();
+    }
+
+    function hasController(name) {
+        if (bank[`${name}`]) return true;
+        return false;
+    }
+
+    function createLargeBtn(data) {
+        const template = templates.largeBtn();
+        const html = Mustache.render(template, data);
+        const dummyContainer = document.createElement('div');
+        dummyContainer.innerHTML = html;
+        return dummyContainer.querySelector('.gomokuBtn');
+    }
+
+    function createPlayerController() {
+        const template = templates.player();
+        const dummyContainer = document.createElement('div');
+        dummyContainer.innerHTML = template;
+        const element = dummyContainer.querySelector('.gomokuPlayer');
+        return element;
+    }
+
+    function getPlayerController() {
+        if (!bank['player']) bank['player'] = createPlayerController();
+        return bank['player']; 
+    }
+
+    function togglePlayerController() {
+        const player = getPlayerController();
+        player.querySelector('.black').classList.toggle('current');
+        player.querySelector('.white').classList.toggle('current');
+    }
+
+    function resetPlayerController() {
+        const player = getPlayerController();
+        const black = player.querySelector('.black');
+        const white = player.querySelector('.white');
+        if (white.classList.contains('current')) {
+            black.classList.toggle('current');
+            white.classList.toggle('current');
+        }
+    }
+
+    function createRollBackController() {
+        const data = { icon: 'reply', text: 'Back' };
+        const btn = createLargeBtn(data);
+        btn.classList.add('gomokuRollBackBtn');
+        btn.addEventListener('click', () => {
+            playClickAudio();
+            game.rollBack()
+        }, false);
+        return btn;
+    }
+
+    function getRollBackController() {
+        if (!bank['rollBack']) bank['rollBack'] = createRollBackController();
+        return bank['rollBack'];
+    }
+
+    function createRestartController() {
+        const data = { icon: 'refresh', text: 'Restart' };
+        const btn = createLargeBtn(data); 
+        btn.classList.add('gomokuRestartBtn');
+        btn.addEventListener('click', () => {
+            playClickAudio();
+            game.restart()
+        }, false);
+        return btn;
+    }
+
+    function getRestartController() {
+        if (!bank['restart']) bank['restart'] = createRestartController();
+        return bank['restart'];
+    }
+
+    function createToggleNumberController() {
+        const data = { icon: 'panorama_fish_eye', text: 'Number Off' };
+        const btn = createLargeBtn(data); 
+        btn.classList.add('gomokuToggleNumberBtn');
+        btn.addEventListener('click', () => { 
+            playClickAudio();
+            board.toggleNumber();
+            const text = btn.querySelector('.text');
+            const icon = btn.querySelector('.icon');
+            if (text.textContent === 'Number Off') {
+                icon.textContent = 'blur_circular';
+                text.textContent = 'Show Number';
+            } else {
+                icon.textContent = 'panorama_fish_eye';
+                text.textContent = 'Number Off';
+            }
+        });
+        return btn;
+    }
+
+    function getToggleNumberController() {
+        if (!bank['toggleNumber']) bank['toggleNumber'] = createToggleNumberController();
+        return bank['toggleNumber'];
+    }
+
+    function createResizeController(size) {
+        const btn = document.createElement('div');
+        btn.classList.add('gomokuBtn');
+        btn.classList.add('btn-sm');
+        btn.classList.add(`gomokuResize${size}`);
+        btn.textContent = `${size} × ${size}`;
+        btn.addEventListener('click', () => {
+            playClickAudio();
+            promptResizeConfirmController(size);
+        }, false);
+        return btn;
+    }
+
+    function getResizeController(size) {
+        if (!bank[`resize_${size}`]) bank[`resize_${size}`] = createResizeController(size);
+        return bank[`resize_${size}`];
+    }        
+
+    function createResizeConfirmController() {
+        const template = templates.resizeConfirm();
+        const dummyContainer = document.createElement('div');
+        dummyContainer.innerHTML = template;
+        const element = dummyContainer.querySelector('.gomokuResizeConfirm');
+        const cancel = element.querySelector('.gomokuBtn.cancel');
+        cancel.addEventListener('click', () => element.remove());
+        return element;
+    }
+
+    function getResizeConfirmController() {
+        if (!bank[`resizeConfirm`]) bank[`resizeConfirm`] = createResizeConfirmController();
+        return bank[`resizeConfirm`];
+    }
+
+    function promptResizeConfirmController(size) {
+        const element = getResizeConfirmController();
+        const confirm = element.querySelector('.gomokuBtn.confirm');
+        confirm.addEventListener('click', () => { 
+            game.reset(size)
+            element.remove();
+        });
+        document.querySelector('body').appendChild(element);
+    }
+
+    function createAnnounceWinnerController() {
+        const template = templates.announceWinner();
+        const data = { trophy: assets.trophy() };
+        const html = Mustache.render(template, data);
+        const dummyContainer = document.createElement('div');
+        dummyContainer.innerHTML = html;
+        const element = dummyContainer.querySelector('.gomokuAnnounceWinner');
+        const btn = element.querySelector('.gomokuBtn.confirm');
+        btn.addEventListener('click', (() => element.remove()));
+        return element;
+    }
+
+    function getAnnounceWinnerController() {
+        if (!bank['announceWinner']) bank['announceWinner'] = createAnnounceWinnerController();
+        return bank['announceWinner'];
+    }
+
+    function createControlBar() {
+        const template = templates.controlBar();
+        const dummyContainer = document.createElement('div');
+        dummyContainer.innerHTML = template;
+        const controlBar = dummyContainer.querySelector('.gomokuControlBar');
+        const control = controlBar.querySelector('.control');
+        const resize = controlBar.querySelector('.resize');
+        control.appendChild(getPlayerController());
+        control.appendChild(getRollBackController());
+        control.appendChild(getRestartController());
+        control.appendChild(getToggleNumberController());
+        const optionalSize = [9, 11, 13, 15, 19];
+        optionalSize.forEach(size => resize.appendChild(getResizeController(size)));
+        return controlBar;
+    }
+
+    function getControlBar() {
+        if (!bank['controlBar']) bank['controlBar'] = createControlBar();
+        return bank['controlBar'];
+    } 
+
+    function createGomokuMain() {
+        const gomokuDefaultSize = 15;
+        const background = assets.background();
+        const logo = assets.logo();
+        const template = templates.gomokuMain();
+        const data = { background: background, logo: logo };
+        const html = Mustache.render(template, data);
+        const dummyContainer = document.createElement('div');
+        dummyContainer.innerHTML = html;
+        const main = dummyContainer.querySelector('.gomokuMain');
+        const boardSection = main.querySelector('.board');
+        game.init(gomokuDefaultSize);
+        board.insertBoard(boardSection);
+        return main;
+    }
+
+    function getGomokuMain() {
+        if (!bank['gomokuMain']) bank['gomokuMain'] = createGomokuMain();
+        return bank['gomokuMain']; 
+    }
+
+    return { hasController, getPlayerController, getRollBackController, togglePlayerController, resetPlayerController, getRestartController, getToggleNumberController, getResizeController, getAnnounceWinnerController, getControlBar, getGomokuMain };
+})();
+
 /* API */
 export const gomoku = (() => {
 
-    function insertBoard(container) {
-        const wrapper = board.getWrapper();
-        wrapper.appendChild(board.getBoard());
-        container.appendChild(wrapper);
+    function insertBoard(container, size) {
+        game.init(size);
+        board.insertBoard(container);
+    }
+
+    function insertPlayerController(container) {
+        container.appendChild(controllers.getPlayerController());
     }
 
     function insertRollBackController(container) {
@@ -635,9 +676,14 @@ export const gomoku = (() => {
         container.appendChild(controllers.getResizeController(size));
     }
 
-    /* User must call this function first to initialize the game and all controllers */
-    function init(size) {
-        game.init(size);
+    /* An out-of-box control bar comming with all controllers */
+    function insertControlBar(container) {
+        container.appendChild(controllers.getControlBar());
+    }
+
+    /* An out-of-box gomoku game interface */
+    function insertGomokuMain(container) {
+        container.appendChild(controllers.getGomokuMain());
     }
 
     /* Optional API */
@@ -647,5 +693,5 @@ export const gomoku = (() => {
         plugins.register('announceWinner', fn);
     } 
 
-    return { init, insertBoard, insertRollBackController, insertRestartController, insertToggleNumberController, insertResizeController, registerAnnounceWinner };
+    return { insertBoard, insertPlayerController, insertRollBackController, insertRestartController, insertToggleNumberController, insertResizeController, insertControlBar, insertGomokuMain, registerAnnounceWinner };
 })();

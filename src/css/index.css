@@ -1,0 +1,49 @@
+@import url(./norm.css);
+@import url(./gomoku.css);
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+:root {
+    --white: #FFFFFF;
+    --gray-100: #E5E5E5;
+    --gray-300: #B2B2B2;
+    --gray-500: #838383;
+    --gray-700: #565656;
+    --black: #000000;
+    --black-translucent: #000000AA;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    grid-template-rows: 1fr;
+}
+
+.footer > .copyright,
+.footer > .source {
+    height: 1.5rem;
+    margin: .75rem .5rem;
+    display: grid;
+    grid-auto-flow: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.footer > .source {
+    gap: .5rem;
+}
+
+.source > a {
+    height: 1.5rem;
+}
+
+.source > a > img {
+    height: 100%;
+    width: auto;
+}
+
+
+
+
+

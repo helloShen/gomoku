@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap'); 
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;400;700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
 /* normalization */
 *,
@@ -37,6 +39,10 @@
     --gomoku-gray-700: #565656;
     --gomoku-muted: #00000044;
     --gomoku-black: #2C2C2C;
+    --white: #FFFFFF;
+    --black: #000000;
+    --black-translucent: #000000AA;
+    --white-translucent: #FFFFFFAA;
 }
 
 .gomokuBoard {
@@ -239,7 +245,6 @@
 .gomokuResizeConfirm > .inner {
     grid-template-columns: 16rem;
     grid-template-rows: 4.5rem 4.5rem;
-    /* animation: gomokuWinnerAnimation .5s ease-in forwards; */
 }
 
 .gomokuAnnounceWinner > .inner {
@@ -279,24 +284,70 @@
     display: grid;
     align-items: center;
     justify-items: center;
+    justify-content: center;
 }
 
 .gomokuBtn:hover {
     background-color: var(--gomoku-gray-700);
 }
 
+.gomokuPlayer {
+    --piece-size: 3rem;
+    height: var(--piece-size);
+    width: 10rem;
+    margin: 2rem 1rem;
+    user-select: none;
+    display: grid;
+    grid-template-columns: var(--piece-size) var(--piece-size);
+    justify-content: space-around;
+}
+
+.gomokuPlayer .black,
+.gomokuPlayer .white {
+    height: var(--piece-size);
+    width: var(--piece-size);
+    border-radius: calc(var(--piece-size) / 2);
+    font-size: .75rem;
+    font-weight: bold;
+    display: grid;
+    align-items: center;
+    justify-items: center;
+}
+
+.gomokuPlayer .black.current,
+.gomokuPlayer .white.current {
+    border: 4px solid var(--gomoku-board-golden-500);
+}
+
+.gomokuPlayer .black {
+    color: var(--white);
+    border: 4px solid var(--white);
+    background-color: var(--gomoku-black);
+}
+
+.gomokuPlayer .white {
+    color: var(--black);
+    background-color: var(--white);
+}
+
+.gomokuBtn {
+    user-select: none;
+}
+
 .gomokuBtn:active,
 .gomokuBtn.current {
     background-color: var(--gomoku-white);
-    border: 3px solid var(--gomoku-black);
     color: var(--gomoku-black);
 }
 
 .gomokuBtn.btn-lg {
     height: 2.5rem;
-    width: 8rem;
+    width: 10rem;
     padding: .5rem 1rem;
     margin: 1rem;
+    display: grid;
+    grid-auto-flow: column;
+    gap: .5rem;
 }
 
 .gomokuBtn.btn-sm {
@@ -306,4 +357,111 @@
     margin: .5rem;
 }
 
+.gomokuControlBar {
+    width: 12rem;
+    min-height: 100vh;
+    padding: 1rem 0;
+    background-color: var(--gomoku-black);
+    box-shadow: 1px 0px 4px var(--black-translucent);
+    opacity: .9;
+    user-select: none;
+    display: grid;
+    align-items: center;
+    align-content: center;
+    justify-items: center;
+    justify-content: center;
+}
+
+.gomokuControlBar > .title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 100;
+    color: var(--white);
+    margin-top: 1rem;
+}
+
+.gomokuMain {
+    font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+    min-width: 36rem;
+    display: grid;
+    grid-template-rows: 8rem 1fr 3rem;
+}
+
+.gomokuMain > img {
+    grid-row: 1 / span 3;
+    grid-column: 1 / span 1;
+    align-self: center;
+    justify-self: center;
+}
+
+.gomokuMain > img.background1 {
+    width: 360px;
+    height: auto;
+    transform: scaleX(-1) translateX(-240px) translateY(60px);
+    z-index: -2;
+}
+
+.gomokuMain > img.background2 {
+    width: 300px;
+    height: auto;
+    transform: rotate(120deg) translateX(160px) translateY(160px);
+    z-index: -1;
+}
+
+.gomokuMain > .header {
+    grid-column: 1 / span 1;
+    grid-row: 1 / span 1;
+    height: 8rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: grid;
+    gap: .5rem;
+    align-items: center;
+    justify-items: center;
+    justify-content: center;
+}
+
+.gomokuMain .logo-img {
+    height: 3.5rem;
+    width: 3.5rem;
+}
+
+.gomokuMain .logo-img > img {
+    width: 100%;
+    height: 100%;
+}
+
+.gomokuMain .logo {
+    font-family: 'Righteous', cursive;
+    height: 2rem;
+    font-size: 1.5rem;
+    color: var(--gomoku-board-golden-700);
+    display: grid;
+    align-items: center;
+    justify-items: center;
+}
+
+.gomokuMain > .board {
+    grid-column: 1 / span 1;
+    grid-row: 2 / span 1;
+    padding: 1rem 2rem;
+    display: grid;
+    align-items: center;
+    justify-items: center;
+}
+
+.gomokuMain > .footer {
+    grid-column: 1 / span 1;
+    grid-row: 3 / span 1;
+    height: 3rem;
+    min-width: 30rem;
+    font-size: .75rem;
+    color: var(--gray-700);
+    display: grid;
+    grid-auto-flow: column;
+    align-items: center;
+    justify-items: center;
+    justify-content: center;
+}
 
