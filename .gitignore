@@ -1,0 +1,4 @@
+# webpack build directory
+dist/
+# modules
+node_modules/
